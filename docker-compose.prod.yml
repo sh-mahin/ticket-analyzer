@@ -1,0 +1,4 @@
+# Phase 0 prod compose — same shape as dev compose in Phase 0.
+# In Phase 1+ we add the `db` service, named volume, and image-pinned services.
+# Kept as a stub so the file exists when we wire it up next phase.
+services: {}
