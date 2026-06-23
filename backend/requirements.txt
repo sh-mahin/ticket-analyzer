@@ -1,7 +1,12 @@
-# Phase 1 — DB stack added. Model deps (torch, transformers) land in Phase 2.
+# Phase 2 — Real model baked into the image.
+# torch pinned via the CPU-only PyTorch wheel index to keep image size sane
+# (no CUDA runtime pulled in on the workshop VM).
+--extra-index-url https://download.pytorch.org/whl/cpu
 fastapi==0.115.5
 uvicorn[standard]==0.32.1
 sqlalchemy==2.0.36
 psycopg2-binary==2.9.10
 pydantic==2.10.3
 pydantic-settings==2.7.0
+torch
+transformers

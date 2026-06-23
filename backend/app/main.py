@@ -6,6 +6,7 @@ real model is loaded in Phase 2.
 """
 
 from contextlib import asynccontextmanager
+import logging
 
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
@@ -18,6 +19,8 @@ from app.routers import health, tickets
 # Import models so that Base.metadata is populated before create_all runs.
 from app import models  # noqa: F401
 
+logger = logging.getLogger(__name__)
+
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
@@ -25,8 +28,12 @@ async def lifespan(app: FastAPI):
     # If the project ever grows past the demo, the upgrade path is Alembic.
     Base.metadata.create_all(bind=engine)
 
-    # Phase 2 will replace this no-op with the real model load.
+    # Real model load — runs AFTER create_all and BEFORE the first request
+    # so latency is stable. `sentiment.load_model()` logs its own status;
+    # we add one explicit line here so `docker compose logs backend` shows
+    # a single, unambiguous "ready" marker for the workshop demo.
     sentiment.load_model()
+    logger.info("Model loaded: distilbert-sst-2")
 
     yield
 
@@ -54,4 +61,4 @@ app.include_router(tickets.router)
 
 @app.get("/")
 def root() -> dict:
-    return {"service": "ticket-analyzer", "phase": 1}
+    return {"service": "ticket-analyzer", "phase": 2}

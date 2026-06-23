@@ -1,6 +1,7 @@
-"""Tickets router — Phase 1.
+"""Tickets router — Phase 2.
 
-POST /tickets: validate, call the (stubbed) sentiment function, persist.
+POST /tickets: validate, run the distilbert SST-2 model via
+`app.sentiment.predict`, persist.
 GET  /tickets: list newest-first with limit/offset pagination.
 """
 
@@ -9,16 +10,10 @@ from typing import List
 from fastapi import APIRouter, Depends, Query, status
 from sqlalchemy.orm import Session
 
-from app import crud, schemas
+from app import crud, schemas, sentiment
 from app.database import get_db
 
 router = APIRouter(prefix="/tickets", tags=["tickets"])
-
-
-# --- Phase 1 stub: replaced by app.sentiment.predict() in Phase 2.
-def fake_sentiment(message: str) -> tuple[str, float]:
-    """Hardcoded sentiment — keeps DB correctness decoupled from model correctness."""
-    return ("POSITIVE", 0.5)
 
 
 @router.post(
@@ -30,8 +25,8 @@ def create_ticket(
     payload: schemas.TicketCreate,
     db: Session = Depends(get_db),
 ) -> schemas.TicketOut:
-    sentiment, confidence = fake_sentiment(payload.message)
-    ticket = crud.create_ticket(db, payload, sentiment, confidence)
+    label, confidence = sentiment.predict(payload.message)
+    ticket = crud.create_ticket(db, payload, label, confidence)
     return schemas.TicketOut.model_validate(ticket)
 
 
