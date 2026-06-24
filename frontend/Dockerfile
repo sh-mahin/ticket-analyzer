@@ -5,7 +5,7 @@ WORKDIR /app
 
 # Build-time env: compiled into the bundle. In Phase 3 we set this to "/api"
 # and route /api through nginx to the backend container.
-ARG VITE_API_BASE_URL=http://localhost:8000
+ARG VITE_API_BASE_URL=/api
 ENV VITE_API_BASE_URL=$VITE_API_BASE_URL
 
 COPY package.json ./
